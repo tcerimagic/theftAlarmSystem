@@ -14,7 +14,7 @@
 #include "net/rpl/rpl.h"
 #include "flash-head.h"
 
-#define CONFIG_FLASH_OFFSET 0;
+#define CONFIG_FLASH_OFFSET 0
 
 void set_init_data(){
 	data_in_flash.secret = 4;

@@ -51,12 +51,13 @@
 #include "ti-lib.h"
 
 
+
 #include "buzzer.h"
 #include "ti-lib.h"
 #include "lpm.h"
+#include "buzzer.h"
 #include "flash-head.h"
-
-
+#include "flash-functions.c"
 
 #define DEBUG 1
 #if DEBUG
@@ -174,7 +175,8 @@ PROCESS_THREAD(er_example_server, ev, data)
   /*--- 5 minute timer initialisation ----*/
 
   if(secret_code == 0){
-	 // set_init_data();
+	 set_init_data();
+	 save_data();
   }
 
   etimer_set(&fmin_etimer, CLOCK_SECOND * 5);
@@ -193,10 +195,11 @@ PROCESS_THREAD(er_example_server, ev, data)
 
     	load_data();
 
+    	secret_code = data_in_flash.secret;
 
     	data_in_flash.secret = ++secret_code;
 
-        //printf("secret %d\n", data_in_flash.secret);
+        printf("default pin %s\n", data_in_flash.default_pin);
 
     	save_data();
 
