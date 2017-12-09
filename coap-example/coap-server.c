@@ -194,7 +194,7 @@ PROCESS_THREAD(er_example_server, ev, data)
 
     	data_in_flash.secret = ++secret_code;
 
-        printf("default pin %s\n", data_in_flash.default_pin);
+        //printf("default pin %s\n", data_in_flash.default_pin);
 
     	save_data();
 
