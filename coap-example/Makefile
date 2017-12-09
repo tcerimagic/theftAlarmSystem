@@ -11,7 +11,7 @@ upload: coap-server.upload
 upload.server: coap-server.upload
 upload.client: coap-client.upload
 
-CONTIKI=../../contiki
+CONTIKI=../../../contiki
 
 CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
 
