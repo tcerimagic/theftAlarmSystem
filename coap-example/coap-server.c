@@ -48,7 +48,9 @@
 #include "batmon-sensor.h"
 #include "lib/sensors.h"
 #include "mpu-9250-sensor.h"
+#include "ti-lib.h"
 
+#define CONFIG_FLASH_OFFSET 0
 #define DEBUG 1
 #if DEBUG
 #include <stdio.h>
@@ -64,26 +66,36 @@
 /*------ Structures --------------------------*/
 
 struct AuthData{
-	char *default_pin = "1234";
+	char *default_pin;
 	char *user_pin;
 	int is_pin_changed; // if 0 -> not changed
+	int secret;
+	int is_armed;
 };
 
 /*------ Global variables --------------------*/
 
-static struct etimer 5min_etimer;
+static struct etimer fmin_etimer;
 static struct AuthData data_in_flash;
 
+static int secret_code = 0;
 
 
 /*------ FUNctions ---------------------------*/
 static void
+set_init_data(){
+	data_in_flash.secret = 4;
+	data_in_flash.default_pin = "1234";
+}
+
+
+static void
 save_data()
 {
+  #if BOARD_SENSORTAG || BOARD_LAUNCHPAD
   /* Dump current running config to flash */
 
   int rv;
-  cc26xx_web_demo_sensor_reading_t *reading = NULL;
 
   rv = ext_flash_open();
 
@@ -93,26 +105,31 @@ save_data()
     return;
   }
 
-  rv = ext_flash_erase(CONFIG_FLASH_OFFSET, sizeof(struct auth_data));
+  rv = ext_flash_erase(CONFIG_FLASH_OFFSET, sizeof(struct AuthData));
 
   if(!rv) {
     printf("Error erasing flash\n");
   } else {
 
-    rv = ext_flash_write(CONFIG_FLASH_OFFSET, sizeof(auth_data),
-                         (uint8_t *)&new_data);
+	data_in_flash.secret = ++secret_code;
+	printf("New secret = %d set\n", data_in_flash.secret);
+
+    rv = ext_flash_write(CONFIG_FLASH_OFFSET, sizeof(data_in_flash),
+                         (uint8_t *)&data_in_flash);
     if(!rv) {
       printf("Error saving data\n");
     }
   }
 
   ext_flash_close();
+  #endif
 }
 
 
 static void
 load_data()
 {
+  #if BOARD_SENSORTAG || BOARD_LAUNCHPAD
   /* Read from flash into saved_data */
   int rv = ext_flash_open();
 
@@ -122,8 +139,12 @@ load_data()
     return;
   }
 
-  rv = ext_flash_read(CONFIG_FLASH_OFFSET, sizeof(tmp_cfg),
-                      (uint8_t *)&saved_data);
+  rv = ext_flash_read(CONFIG_FLASH_OFFSET, sizeof(data_in_flash),
+                      (uint8_t *)&data_in_flash);
+
+  secret_code = data_in_flash.secret;
+
+  printf("Old secret = %d\n", data_in_flash.secret);
 
   ext_flash_close();
 
@@ -131,6 +152,7 @@ load_data()
     printf("Error loading data\n");
     return;
   }
+  #endif
 
 }
 
@@ -224,7 +246,12 @@ PROCESS_THREAD(er_example_server, ev, data)
 
   /* Define application-specific events here. */
   /*--- 5 minute timer initialisation ----*/
-  etimer_set(&5min_etimer, CLOCK_SECOND * 300);
+
+  if(secret_code == 0){
+	  set_init_data();
+  }
+
+  etimer_set(&fmin_etimer, CLOCK_SECOND * 10);
 
   while(1) {
     PROCESS_WAIT_EVENT();
@@ -236,7 +263,12 @@ PROCESS_THREAD(er_example_server, ev, data)
       res_event.trigger();
 
     }
-    else if(etimer_expired(&5min_etimer)){
+    else if(etimer_expired(&fmin_etimer)){
+
+    	load_data();
+    	save_data();
+
+    	etimer_reset(&fmin_etimer);
 
 
 
