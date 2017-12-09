@@ -50,12 +50,14 @@
 #include "mpu-9250-sensor.h"
 #include "ti-lib.h"
 
-
 #define CONFIG_FLASH_OFFSET 0
 
 #include "buzzer.h"
 #include "ti-lib.h"
 #include "lpm.h"
+#include "flash.h"
+#include "flash-head.h"
+
 
 
 #define DEBUG 1
@@ -70,98 +72,16 @@
 #define PRINTLLADDR(addr)
 #endif
 
-/*------ Structures --------------------------*/
 
-struct AuthData{
-	char *default_pin;
-	char *user_pin;
-	int is_pin_changed; // if 0 -> not changed
-	int secret;
-	int is_armed;
-};
 
 /*------ Global variables --------------------*/
 
 static struct etimer fmin_etimer;
-static struct AuthData data_in_flash;
-
 static int secret_code = 0;
 
 
 /*------ FUNctions ---------------------------*/
-static void
-set_init_data(){
-	data_in_flash.secret = 4;
-	data_in_flash.default_pin = "1234";
-}
 
-
-static void
-save_data()
-{
-  #if BOARD_SENSORTAG || BOARD_LAUNCHPAD
-  /* Dump current running config to flash */
-
-  int rv;
-
-  rv = ext_flash_open();
-
-  if(!rv) {
-    printf("Could not open flash to save data\n");
-    ext_flash_close();
-    return;
-  }
-
-  rv = ext_flash_erase(CONFIG_FLASH_OFFSET, sizeof(struct AuthData));
-
-  if(!rv) {
-    printf("Error erasing flash\n");
-  } else {
-
-	data_in_flash.secret = ++secret_code;
-	printf("New secret = %d set\n", data_in_flash.secret);
-
-    rv = ext_flash_write(CONFIG_FLASH_OFFSET, sizeof(data_in_flash),
-                         (uint8_t *)&data_in_flash);
-    if(!rv) {
-      printf("Error saving data\n");
-    }
-  }
-
-  ext_flash_close();
-  #endif
-}
-
-
-static void
-load_data()
-{
-  #if BOARD_SENSORTAG || BOARD_LAUNCHPAD
-  /* Read from flash into saved_data */
-  int rv = ext_flash_open();
-
-  if(!rv) {
-    printf("Could not open flash to load data\n");
-    ext_flash_close();
-    return;
-  }
-
-  rv = ext_flash_read(CONFIG_FLASH_OFFSET, sizeof(data_in_flash),
-                      (uint8_t *)&data_in_flash);
-
-  secret_code = data_in_flash.secret;
-
-  printf("Old secret = %d\n", data_in_flash.secret);
-
-  ext_flash_close();
-
-  if(!rv) {
-    printf("Error loading data\n");
-    return;
-  }
-  #endif
-
-}
 
 /*
  * Resources to be activated need to be imported through the extern keyword.
@@ -256,10 +176,10 @@ PROCESS_THREAD(er_example_server, ev, data)
   /*--- 5 minute timer initialisation ----*/
 
   if(secret_code == 0){
-	  set_init_data();
+	 // set_init_data();
   }
 
-  etimer_set(&fmin_etimer, CLOCK_SECOND * 10);
+  etimer_set(&fmin_etimer, CLOCK_SECOND * 5);
 
   while(1) {
     PROCESS_WAIT_EVENT();
@@ -274,6 +194,12 @@ PROCESS_THREAD(er_example_server, ev, data)
     else if(etimer_expired(&fmin_etimer)){
 
     	load_data();
+
+
+    	data_in_flash.secret = ++secret_code;
+
+        //printf("secret %d\n", data_in_flash.secret);
+
     	save_data();
 
     	etimer_reset(&fmin_etimer);
