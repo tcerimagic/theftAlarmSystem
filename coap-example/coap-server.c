@@ -49,6 +49,10 @@
 #include "lib/sensors.h"
 #include "mpu-9250-sensor.h"
 
+#include "buzzer.h"
+#include "ti-lib.h"
+#include "lpm.h"
+
 #define DEBUG 1
 #if DEBUG
 #include <stdio.h>
@@ -86,9 +90,10 @@ AUTOSTART_PROCESSES(&resolv_process,&er_example_server);
 PROCESS_THREAD(er_example_server, ev, data)
 {
 	SENSORS_ACTIVATE(batmon_sensor);
-	//SENSORS_ACTIVATE(mpu_9250_sensor);
-	//init_mpu_reading(NULL);
-	mpu_9250_sensor.configure(SENSORS_ACTIVE,MPU_9250_SENSOR_TYPE_ALL);
+	SENSORS_ACTIVATE(mpu_9250_sensor);
+
+	buzzer_init();
+
 #if DAG_ROOT_ENABLE
   struct uip_ds6_addr *root_if;
   uip_ipaddr_t ipaddr;
@@ -117,7 +122,7 @@ PROCESS_THREAD(er_example_server, ev, data)
 
   PROCESS_PAUSE();
 
-  PRINTF("Starting Erbium Example Server\n");
+  PRINTF("Starting Theft Server\n");
 
   PRINTF("uIP buffer: %u\n", UIP_BUFSIZE);
   PRINTF("LL header: %u\n", UIP_LLH_LEN);
@@ -131,20 +136,17 @@ PROCESS_THREAD(er_example_server, ev, data)
    * Bind the resources to their Uri-Path.
    * WARNING: Activating twice only means alternate path, not two instances!
    * All static variables are the same for each URI path.
+   *
    */
-  rest_activate_resource(&res_hello, "test/hello");
-  rest_activate_resource(&res_leds, "actuators/leds");
-  rest_activate_resource(&res_toggle, "actuators/toggle");
-  rest_activate_resource(&res_push, "test/push");
-  rest_activate_resource(&res_event, "sensors/button"); 
-  rest_activate_resource(&res_batmon, "sensors/battery");
   rest_activate_resource(&res_login, "auth/login");
-    rest_activate_resource(&res_change, "auth/change");
-    rest_activate_resource(&res_arm, "theft/arm");
-    rest_activate_resource(&res_threshold, "theft/threshold");
-    rest_activate_resource(&res_alarm, "theft/alarm");
-    rest_activate_resource(&res_sensor, "theft/sensor");
-    rest_activate_resource(&res_keepalive, "keepalive");
+  rest_activate_resource(&res_change, "auth/change");
+  rest_activate_resource(&res_arm, "theft/arm");
+  rest_activate_resource(&res_threshold, "theft/threshold");
+  rest_activate_resource(&res_alarm, "theft/alarm");
+  rest_activate_resource(&res_sensor, "theft/sensor");
+  rest_activate_resource(&res_keepalive, "keepalive");
+
+
 
   /* Define application-specific events here. */
   while(1) {
