@@ -50,7 +50,14 @@
 #include "mpu-9250-sensor.h"
 #include "ti-lib.h"
 
+
 #define CONFIG_FLASH_OFFSET 0
+
+#include "buzzer.h"
+#include "ti-lib.h"
+#include "lpm.h"
+
+
 #define DEBUG 1
 #if DEBUG
 #include <stdio.h>
@@ -184,6 +191,7 @@ PROCESS_THREAD(er_example_server, ev, data)
 	//SENSORS_ACTIVATE(mpu_9250_sensor);
 	//init_mpu_reading(NULL);
 	mpu_9250_sensor.configure(SENSORS_ACTIVE,MPU_9250_SENSOR_TYPE_ALL);
+	buzzer_init();
 #if DAG_ROOT_ENABLE
   struct uip_ds6_addr *root_if;
   uip_ipaddr_t ipaddr;
