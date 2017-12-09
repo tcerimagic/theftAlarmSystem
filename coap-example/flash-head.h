@@ -27,5 +27,4 @@ struct AuthData{
 
 struct AuthData data_in_flash;
 
-
 #endif /* THEFTALARMSYSTEM_COAP_EXAMPLE_FLASH_HEAD_H_ */
