@@ -50,6 +50,11 @@
 #include "mpu-9250-sensor.h"
 #include "ti-lib.h"
 
+
+
+#include "buzzer.h"
+#include "ti-lib.h"
+#include "lpm.h"
 #include "buzzer.h"
 #include "flash-head.h"
 #include "flash-functions.c"
