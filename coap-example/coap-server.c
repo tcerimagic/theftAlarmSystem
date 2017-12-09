@@ -61,6 +61,79 @@
 #define PRINTLLADDR(addr)
 #endif
 
+/*------ Structures --------------------------*/
+
+struct AuthData{
+	char *default_pin = "1234";
+	char *user_pin;
+	int is_pin_changed; // if 0 -> not changed
+};
+
+/*------ Global variables --------------------*/
+
+static struct etimer 5min_etimer;
+static struct AuthData data_in_flash;
+
+
+
+/*------ FUNctions ---------------------------*/
+static void
+save_data()
+{
+  /* Dump current running config to flash */
+
+  int rv;
+  cc26xx_web_demo_sensor_reading_t *reading = NULL;
+
+  rv = ext_flash_open();
+
+  if(!rv) {
+    printf("Could not open flash to save data\n");
+    ext_flash_close();
+    return;
+  }
+
+  rv = ext_flash_erase(CONFIG_FLASH_OFFSET, sizeof(struct auth_data));
+
+  if(!rv) {
+    printf("Error erasing flash\n");
+  } else {
+
+    rv = ext_flash_write(CONFIG_FLASH_OFFSET, sizeof(auth_data),
+                         (uint8_t *)&new_data);
+    if(!rv) {
+      printf("Error saving data\n");
+    }
+  }
+
+  ext_flash_close();
+}
+
+
+static void
+load_data()
+{
+  /* Read from flash into saved_data */
+  int rv = ext_flash_open();
+
+  if(!rv) {
+    printf("Could not open flash to load data\n");
+    ext_flash_close();
+    return;
+  }
+
+  rv = ext_flash_read(CONFIG_FLASH_OFFSET, sizeof(tmp_cfg),
+                      (uint8_t *)&saved_data);
+
+  ext_flash_close();
+
+  if(!rv) {
+    printf("Error loading data\n");
+    return;
+  }
+
+}
+
 /*
  * Resources to be activated need to be imported through the extern keyword.
  * The build system automatically compiles the resources in the corresponding sub-directory.
@@ -146,10 +219,16 @@ PROCESS_THREAD(er_example_server, ev, data)
     rest_activate_resource(&res_sensor, "theft/sensor");
     rest_activate_resource(&res_keepalive, "keepalive");
 
+
+
+
   /* Define application-specific events here. */
+  /*--- 5 minute timer initialisation ----*/
+  etimer_set(&5min_etimer, CLOCK_SECOND * 300);
+
   while(1) {
     PROCESS_WAIT_EVENT();
-#if PLATFORM_HAS_BUTTON
+
     if(ev == sensors_event && data == &button_sensor) {
       PRINTF("*******BUTTON*******\n");
 
@@ -157,8 +236,13 @@ PROCESS_THREAD(er_example_server, ev, data)
       res_event.trigger();
 
     }
-#endif /* PLATFORM_HAS_BUTTON */
-  } /* while (1) */
+    else if(etimer_expired(&5min_etimer)){
+
+
+
+    }
+
+ } /* while (1) */
 
   PROCESS_END();
 }
