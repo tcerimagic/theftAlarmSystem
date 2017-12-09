@@ -35,12 +35,10 @@ RESOURCE(res_arm,
 //post, put, delete
 static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
-	int alarm_on = 0;
+	uint8_t alarm_on = buzzer_state();
 
-	if(buzzer_state())
-		{
-			alarm_on = 1;
-		}
+	printf("alarm on: %d ", alarm_on);
+
 
 	snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d", alarm_on);
 			int length= strlen((char*)buffer);
