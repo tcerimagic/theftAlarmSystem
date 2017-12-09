@@ -50,12 +50,10 @@
 #include "mpu-9250-sensor.h"
 #include "ti-lib.h"
 
-#define CONFIG_FLASH_OFFSET 0
 
 #include "buzzer.h"
 #include "ti-lib.h"
 #include "lpm.h"
-#include "flash.h"
 #include "flash-head.h"
 
 

@@ -12,7 +12,7 @@
 #include "contiki-net.h"
 #include "rest-engine.h"
 #include "net/rpl/rpl.h"
-#include "flash-handler.h"
+#include "flash-head.h"
 
 #define CONFIG_FLASH_OFFSET 0;
 
