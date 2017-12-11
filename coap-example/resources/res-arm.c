@@ -92,14 +92,14 @@ static void res_post_handler(void *request, void *response, uint8_t *buffer, uin
 
 
 	if (success == 0) {
-			strcat(message, "-1");
+		snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "-1");
 		} else {
-			strcat(message, "0");
+			snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "0");
 		}
 
 		save_data();
 
-			snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%s", message);
+
 			int length= strlen((char*)buffer);
 
 			REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
@@ -145,14 +145,14 @@ static void res_put_handler(void *request, void *response, uint8_t *buffer, uint
 
 
 		if (success == 0) {
-				strcat(message, "-1");
+			snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "-1");
 			} else {
-				strcat(message, "0");
+				snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "0");
 			}
 
 			save_data();
 
-				snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%s", message);
+
 				int length= strlen((char*)buffer);
 
 				REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
