@@ -47,6 +47,7 @@ static void res_get_handler(void *request, void *response, uint8_t *buffer,
 			load_data();
 			if (atoi(pin) == 1234)
 			{
+				etimer_set(&alarm_timer,CLOCK_SECOND * 300);
 				snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d", data_in_flash.secret);
 						int length= strlen((char*)buffer);
 						REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
@@ -65,6 +66,7 @@ static void res_get_handler(void *request, void *response, uint8_t *buffer,
 			load_data();
 			if (atoi(pin) == data_in_flash.user_pin)
 			{
+				etimer_set(&alarm_timer,CLOCK_SECOND * 300);
 				snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d", data_in_flash.secret);
 				int length= strlen((char*)buffer);
 				REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */

@@ -28,6 +28,8 @@ struct AuthData{
 	int is_alarm_on;
 };
 
+static struct etimer alarm_timer;
+
 struct AuthData data_in_flash;
 
 #endif /* THEFTALARMSYSTEM_COAP_EXAMPLE_FLASH_HEAD_H_ */

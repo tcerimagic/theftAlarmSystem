@@ -80,7 +80,7 @@
 
 static struct etimer fmin_etimer;
 static int secret_code = 0;
-static struct etimer alarm_timer;
+
 
 
 /*------ FUNctions ---------------------------*/
