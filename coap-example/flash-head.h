@@ -20,8 +20,8 @@ void turn_off_alarm(void);
 /*------ Structures --------------------------*/
 
 struct AuthData{
-	char *default_pin;
-	char *user_pin;
+	int default_pin;
+	int user_pin;
 	int secret;
 	int is_armed;
 	int is_pin_default;

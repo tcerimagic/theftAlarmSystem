@@ -22,7 +22,7 @@ static struct etimer alarm_timer;
 void set_init_data(){
 	data_in_flash.is_armed = 0;
 	data_in_flash.is_pin_default = 1; //pin is default = 1
-	data_in_flash.default_pin = "1234";
+	data_in_flash.default_pin = 1234;
 }
 
 
