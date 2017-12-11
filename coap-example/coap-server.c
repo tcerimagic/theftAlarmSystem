@@ -232,14 +232,55 @@ PROCESS_THREAD(er_example_server, ev, data)
 }
 
 PROCESS_THREAD(alarm_on, ev, data){
-	PROCESS_EXITHANDLER();// Cleanup code (if any)
+	PROCESS_EXITHANDLER();
 	PROCESS_BEGIN();
 
 	etimer_set(&alarm_timer, LED_TOGGLE_INTERVAL);
 
 	while(1) {
 
-			PROCESS_WAIT_EVENT();
+		if(ev == device_armed_event){
+
+			int armed_device = 0;
+
+			while(armed_device != 1){
+				int x_axis= mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_X);
+				int y_axis= mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_Y);
+				int z_axis= mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_Z);
+
+				load_data();
+				if(x_axis > data_in_flash.threshold){
+					turn_on_alarm();
+					armed_device = 1;
+				}
+				else if(y_axis > data_in_flash.threshold){
+					turn_on_alarm();
+					armed_device = 1;
+				}
+				else if(z_axis > data_in_flash.threshold){
+					turn_on_alarm();
+					armed_device = 1;
+				}
+				save_data();
+
+
+
+			}
+
+			if(armed_device == 1){
+				//upali ledicu
+			}
+
+
+
+		}
+		else if(ev == device_disarm_event){
+			// ugasi led i ugasi alarm
+		}
+
+
+
+			/*PROCESS_WAIT_EVENT();
 			if( ev == PROCESS_EVENT_TIMER) {
 				load_data();
 				if(data_in_flash.is_alarm_on){
@@ -248,7 +289,8 @@ PROCESS_THREAD(alarm_on, ev, data){
 						printf("toggle led");
 					}
 				}
-			}
+			}*/
+
 
 		PROCESS_END();
 }
