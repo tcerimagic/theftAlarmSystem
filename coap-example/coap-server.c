@@ -80,6 +80,15 @@
 
 static struct etimer fmin_etimer;
 static int secret_code = 0;
+static struct etimer alarm_timer;
+
+
+enum {
+	device_disarm_event,
+	device_armed_event,
+	get_lock
+};
+
 
 
 
@@ -159,19 +168,19 @@ PROCESS_THREAD(er_example_server, ev, data)
    * WARNING: Activating twice only means alternate path, not two instances!
    * All static variables are the same for each URI path.
    */
-  rest_activate_resource(&res_hello, "test/hello");
-  rest_activate_resource(&res_leds, "actuators/leds");
-  rest_activate_resource(&res_toggle, "actuators/toggle");
-  rest_activate_resource(&res_push, "test/push");
-  rest_activate_resource(&res_event, "sensors/button"); 
-  rest_activate_resource(&res_batmon, "sensors/battery");
-  rest_activate_resource(&res_login, "auth/login");
-    rest_activate_resource(&res_change, "auth/change");
-    rest_activate_resource(&res_arm, "theft/arm");
-    rest_activate_resource(&res_threshold, "theft/threshold");
-    rest_activate_resource(&res_alarm, "theft/alarm");
-    rest_activate_resource(&res_sensor, "theft/sensor");
-    rest_activate_resource(&res_keepalive, "keepalive");
+  	 rest_activate_resource(&res_hello, "test/hello");
+     rest_activate_resource(&res_leds, "actuators/leds");
+     rest_activate_resource(&res_toggle, "actuators/toggle");
+     rest_activate_resource(&res_push, "test/push");
+     rest_activate_resource(&res_event, "sensors/button");
+     rest_activate_resource(&res_batmon, "sensors/battery");
+     rest_activate_resource(&res_login, "auth/login");
+     rest_activate_resource(&res_change, "auth/change");
+     rest_activate_resource(&res_arm, "theft/arm");
+     rest_activate_resource(&res_threshold, "theft/threshold");
+     rest_activate_resource(&res_alarm, "theft/alarm");
+     rest_activate_resource(&res_sensor, "theft/sensor");
+     rest_activate_resource(&res_keepalive, "keepalive");
 
 
 
@@ -226,7 +235,7 @@ PROCESS_THREAD(er_example_server, ev, data)
 
     }
 
- } /* while (1) */
+ }
 
   PROCESS_END();
 }
@@ -235,7 +244,7 @@ PROCESS_THREAD(alarm_on, ev, data){
 	PROCESS_EXITHANDLER();
 	PROCESS_BEGIN();
 
-	etimer_set(&alarm_timer, LED_TOGGLE_INTERVAL);
+	//timer_set(&alarm_timer, LED_TOGGLE_INTERVAL);
 
 	while(1) {
 
@@ -263,34 +272,24 @@ PROCESS_THREAD(alarm_on, ev, data){
 				}
 				save_data();
 
-
-
 			}
 
 			if(armed_device == 1){
-				//upali ledicu
+				etimer_set(&alarm_timer, LED_TOGGLE_INTERVAL);
+
 			}
-
-
 
 		}
 		else if(ev == device_disarm_event){
-			// ugasi led i ugasi alarm
+				turn_off_alarm();
 		}
 
-
-
-			/*PROCESS_WAIT_EVENT();
-			if( ev == PROCESS_EVENT_TIMER) {
-				load_data();
-				if(data_in_flash.is_alarm_on){
-						etimer_set(&alarm_timer, LED_TOGGLE_INTERVAL);
-						leds_toggle(LEDS_RED);
-						printf("toggle led");
-					}
-				}
-			}*/
-
+		if(etimer_expired(&alarm_timer)){
+			leds_toggle(LEDS_RED);
+			if(data_in_flash.is_alarm_on){
+				etimer_set(&alarm_timer, LED_TOGGLE_INTERVAL);
+			}
+		}
 
 		PROCESS_END();
 }

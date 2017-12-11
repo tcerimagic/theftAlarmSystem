@@ -36,4 +36,9 @@ static struct etimer alarm_timer;
 
 struct AuthData data_in_flash;
 
+enum {
+	device_disarm_event,
+	device_armed_event
+};
+
 #endif /* THEFTALARMSYSTEM_COAP_EXAMPLE_FLASH_HEAD_H_ */
