@@ -32,7 +32,7 @@ struct AuthData{
 	int threshold;
 };
 
-static struct etimer alarm_timer;
+static struct etimer fmin_etimer;
 
 struct AuthData data_in_flash;
 

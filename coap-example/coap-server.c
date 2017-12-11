@@ -78,7 +78,7 @@
 
 /*------ Global variables --------------------*/
 
-static struct etimer fmin_etimer;
+
 static int secret_code = 0;
 static struct etimer alarm_timer;
 
@@ -194,7 +194,7 @@ PROCESS_THREAD(er_example_server, ev, data)
 	 save_data();
   }*/
 
-  etimer_set(&fmin_etimer, CLOCK_SECOND * 60);
+  etimer_set(&fmin_etimer, CLOCK_SECOND * 300);
 
   if(data_in_flash.secret == -1)
     {
@@ -229,7 +229,7 @@ PROCESS_THREAD(er_example_server, ev, data)
 
     	save_data();
 
-    	etimer_reset(&fmin_etimer);
+    	etimer_set(&fmin_etimer, CLOCK_SECOND * 300);
 
 
 

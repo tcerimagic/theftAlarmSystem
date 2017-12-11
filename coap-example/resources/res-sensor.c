@@ -52,7 +52,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	    	      x_axis = -x_axis;
 	    	    }
 	    	  //G
-	    	  data_in_flash.x_axis = x_axis;
+	    	  //data_in_flash.x_axis = x_axis;
 	    	snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d", x_axis);
 	    } else if(strncmp(axis, "y", len) == 0) {
 	    	int y_axis= mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_Y);
@@ -63,7 +63,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	    		 y_axis = -y_axis;
 	    	}
 	    		    	  //G
-	    	 data_in_flash.y_axis = y_axis;
+	    	 //data_in_flash.y_axis = y_axis;
 	    	 snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d", y_axis);
 	    } else if(strncmp(axis, "z", len) == 0) {
 	    	int z_axis= mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_Z);
@@ -74,7 +74,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	    		    	z_axis = -z_axis;
 	    		    }
 	    		    		    	  //G
-	    		  data_in_flash.z_axis = z_axis;
+	    		  //data_in_flash.z_axis = z_axis;
 	    		   snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d", z_axis);
 	    }
 	 }
