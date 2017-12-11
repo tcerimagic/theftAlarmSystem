@@ -26,6 +26,10 @@ struct AuthData{
 	int is_armed;
 	int is_pin_default;
 	int is_alarm_on;
+	int x_axis;
+	int y_axis;
+	int z_axis;
+	int threshold;
 };
 
 static struct etimer alarm_timer;

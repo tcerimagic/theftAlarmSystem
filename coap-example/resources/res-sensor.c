@@ -14,6 +14,7 @@
 #include "lib/sensors.h"
 #include "mpu-9250-sensor.h"
 #include "lib/sensors.h"
+#include "flash-head.h"
 
 static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 
@@ -39,7 +40,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	  size_t len = 0;
 	  const char *axis = NULL;
 	  int success = 1;
-
+	  load_data();
 
 	if((len = REST.get_query_variable(request, "axis", &axis))) {
 
@@ -51,7 +52,8 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	    	      x_axis = -x_axis;
 	    	    }
 	    	  //G
-	    	snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d.%02d", x_axis / 100, x_axis % 100);
+	    	  data_in_flash.x_axis = x_axis;
+	    	snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d", x_axis);
 	    } else if(strncmp(axis, "y", len) == 0) {
 	    	int y_axis= mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_Y);
 	    	//printf("usao u y");
@@ -61,7 +63,8 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	    		 y_axis = -y_axis;
 	    	}
 	    		    	  //G
-	    	 snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d.%02d", y_axis / 100, y_axis % 100);
+	    	 data_in_flash.y_axis = y_axis;
+	    	 snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d", y_axis);
 	    } else if(strncmp(axis, "z", len) == 0) {
 	    	int z_axis= mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_Z);
 	    		    	//printf("usao u y");
@@ -71,11 +74,8 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	    		    	z_axis = -z_axis;
 	    		    }
 	    		    		    	  //G
-	    		   snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d.%02d", z_axis / 100, z_axis % 100);
-	    /*	printf("usao u z");
-	    	int z_axis= mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_Z);
-	    	print_mpu_reading(x_axis);
-	    	snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d", z_axis); */
+	    		  data_in_flash.z_axis = z_axis;
+	    		   snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d", z_axis);
 	    }
 	 }
 	else {
@@ -83,6 +83,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 		snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, " ");
 
 	}
+	save_data();
 	int length= strlen((char*)buffer);
 	REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
 	REST.set_header_etag(response, (uint8_t *)&length, 1);
