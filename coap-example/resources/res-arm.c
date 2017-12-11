@@ -76,7 +76,6 @@ static void res_post_handler(void *request, void *response, uint8_t *buffer, uin
 				data_in_flash.y_axis= mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_Y);
 				data_in_flash.z_axis= mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_Z);
 				data_in_flash.is_armed = 1;
-				process_post(&alarm_on,device_armed_event,NULL);
 
 			}
 
@@ -131,7 +130,6 @@ static void res_put_handler(void *request, void *response, uint8_t *buffer, uint
 					data_in_flash.y_axis= mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_Y);
 					data_in_flash.z_axis= mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_Z);
 					data_in_flash.is_armed = 1;
-					process_post(&alarm_on,device_armed_event,NULL);
 				}
 
 				else {
@@ -180,10 +178,11 @@ static void res_delete_handler(void *request, void *response, uint8_t *buffer, u
 
 				if (atoi(secret) == data_in_flash.secret) {
 					printf("secret is good!\n");
-					if(data_in_flash.is_armed == 1)
+					if(data_in_flash.is_armed == 1 || data_in_flash.is_alarm_on == 1)
 						{
+							printf("Ugasi alarm");
 							turn_off_alarm();
-							process_post(&alarm_on,device_disarm_event,NULL);
+							data_in_flash.is_armed=0;
 						}
 				}
 
@@ -200,14 +199,14 @@ static void res_delete_handler(void *request, void *response, uint8_t *buffer, u
 
 
 		if (success == 0) {
-				strcat(message, "-1");
+			snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "-1");
 			} else {
-				strcat(message, "0");
+				snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "0");
 			}
 
 			save_data();
 
-				snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%s", message);
+
 				int length= strlen((char*)buffer);
 
 				REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */

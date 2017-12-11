@@ -83,15 +83,6 @@ static int secret_code = 0;
 static struct etimer alarm_timer;
 
 
-enum {
-	device_disarm_event,
-	device_armed_event,
-	get_lock
-};
-
-
-
-
 /*------ FUNctions ---------------------------*/
 
 
@@ -115,8 +106,8 @@ extern resource_t
   res_keepalive;
 
 PROCESS(er_example_server, "Erbium Example Server");
-PROCESS(alarm_on, "ALARM is ON");
-AUTOSTART_PROCESSES(&resolv_process,&er_example_server, &alarm_on);
+//PROCESS(alarm_on, "ALARM is ON");
+AUTOSTART_PROCESSES(&resolv_process,&er_example_server);
 
 PROCESS_THREAD(er_example_server, ev, data)
 {
@@ -183,17 +174,6 @@ PROCESS_THREAD(er_example_server, ev, data)
      rest_activate_resource(&res_keepalive, "keepalive");
 
 
-
-
-  /* Define application-specific events here. */
-  /*--- 5 minute timer initialisation ----*/
-
-/*  if(secret_code == 0){
-	  load_data();
-	 set_init_data();
-	 save_data();
-  }*/
-
   etimer_set(&fmin_etimer, CLOCK_SECOND * 300);
 
   if(data_in_flash.secret == -1)
@@ -240,15 +220,16 @@ PROCESS_THREAD(er_example_server, ev, data)
   PROCESS_END();
 }
 
-PROCESS_THREAD(alarm_on, ev, data){
+/*PROCESS_THREAD(alarm_on, ev, data){
 	PROCESS_EXITHANDLER();
 	PROCESS_BEGIN();
 
 	//timer_set(&alarm_timer, LED_TOGGLE_INTERVAL);
+	load_data();
 
 	while(1) {
-
-		if(ev == device_armed_event){
+		printf("uso u while");
+		if(data_in_flash.is_armed == 1){
 
 			int armed_device = 0;
 
@@ -280,8 +261,9 @@ PROCESS_THREAD(alarm_on, ev, data){
 			}
 
 		}
-		else if(ev == device_disarm_event){
+		else if(data_in_flash.is_armed == 0){
 				turn_off_alarm();
+				printf("u disarmu");
 		}
 
 		if(etimer_expired(&alarm_timer)){
@@ -290,8 +272,9 @@ PROCESS_THREAD(alarm_on, ev, data){
 				etimer_set(&alarm_timer, LED_TOGGLE_INTERVAL);
 			}
 		}
+	}
 
 
 		PROCESS_END();
-}
+}*/
 

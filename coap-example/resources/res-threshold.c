@@ -73,14 +73,13 @@ static void res_put_handler(void *request, void *response, uint8_t *buffer, uint
 					else{
 						snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "-1");
 					}
-
-				}
 			  }
 				else {
 					printf("secret not good!\n");
 					turn_on_alarm();
 					snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "-1");
 				}
+			  }
 
 			  	save_data();
 
