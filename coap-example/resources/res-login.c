@@ -45,7 +45,7 @@ static void res_get_handler(void *request, void *response, uint8_t *buffer,
 		else if (length == 4 && data_in_flash.is_pin_default == 1)
 		{
 			load_data();
-			if (strncmp(pin, "1234", length) == 0)
+			if (atoi(pin) == 1234)
 			{
 				snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d", data_in_flash.secret);
 						int length= strlen((char*)buffer);
@@ -63,7 +63,7 @@ static void res_get_handler(void *request, void *response, uint8_t *buffer,
 		else if (length == 4 && data_in_flash.is_pin_default == 0)
 		{
 			load_data();
-			if (strncmp(pin, data_in_flash.user_pin, length) == 0)
+			if (atoi(pin) == data_in_flash.user_pin)
 			{
 				snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d", data_in_flash.secret);
 				int length= strlen((char*)buffer);

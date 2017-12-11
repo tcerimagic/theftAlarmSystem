@@ -180,7 +180,14 @@ PROCESS_THREAD(er_example_server, ev, data)
 	 save_data();
   }*/
 
-  etimer_set(&fmin_etimer, CLOCK_SECOND * 5);
+  etimer_set(&fmin_etimer, CLOCK_SECOND * 60);
+
+  if(data_in_flash.secret == -1)
+    {
+	  load_data();
+	  set_init_data();
+	  save_data();
+    }
 
   while(1) {
     PROCESS_WAIT_EVENT();
