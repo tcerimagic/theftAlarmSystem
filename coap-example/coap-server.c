@@ -239,7 +239,7 @@ PROCESS_THREAD(alarm_on, ev, data){
 
 	while(1) {
 
-		if(ev == device_armed_event){
+		/*if(ev == device_armed_event){
 
 			int armed_device = 0;
 
@@ -288,8 +288,8 @@ PROCESS_THREAD(alarm_on, ev, data){
 						leds_toggle(LEDS_RED);
 						printf("toggle led");
 					}
-				}
-			}*/
+				}*/
+			}
 
 
 		PROCESS_END();

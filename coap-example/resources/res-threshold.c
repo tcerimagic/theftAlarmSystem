@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "rest-engine.h"
+#include "flash-head.h"
 
 static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 static void res_put_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
@@ -44,10 +45,10 @@ static void res_get_handler(void *request, void *response, uint8_t *buffer, uint
 			}
 
 		 }
-		  int length= strlen((char*)buffer);
+		  int len= strlen((char*)buffer);
 		  REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
-		  REST.set_header_etag(response, (uint8_t *)&length, 1);
-		  REST.set_response_payload(response, buffer, length);
+		  REST.set_header_etag(response, (uint8_t *)&len, 1);
+		  REST.set_response_payload(response, buffer, len);
 }
 
 static void res_put_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
@@ -64,7 +65,7 @@ static void res_put_handler(void *request, void *response, uint8_t *buffer, uint
 					//secret is valid
 					printf("secret is good!\n");
 
-					if(len = REST.get_query_variable(request, "threshold", &threshold_receive)){
+					if(length = REST.get_query_variable(request, "threshold", &threshold_receive)){
 
 						data_in_flash.threshold = atoi(threshold_receive);
 						snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "0");
@@ -83,11 +84,11 @@ static void res_put_handler(void *request, void *response, uint8_t *buffer, uint
 
 			  	save_data();
 
-			  	int length= strlen((char*)buffer);
+			  	int len= strlen((char*)buffer);
 
 			  	REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
-			  	REST.set_header_etag(response, (uint8_t *)&length, 1);
-			  	REST.set_response_payload(response, buffer, length);
+			  	REST.set_header_etag(response, (uint8_t *)&len, 1);
+			  	REST.set_response_payload(response, buffer, len);
 
 }
 
