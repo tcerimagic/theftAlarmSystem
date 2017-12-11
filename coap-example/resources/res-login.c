@@ -8,8 +8,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "rest-engine.h"
+#include  "../flash-head.h"
+//#include "../flash-functions.c"
 
-static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
+static void res_get_handler(void *request, void *response, uint8_t *buffer,
+		uint16_t preferred_size, int32_t *offset);
 
 /*
  * A handler function named [resource name]_handler must be implemented for each RESOURCE.
@@ -18,44 +21,64 @@ static void res_get_handler(void *request, void *response, uint8_t *buffer, uint
  * If a smaller block size is requested for CoAP, the REST framework automatically splits the data.
  */
 RESOURCE(res_login,
-         "title=\"Hello world: ?len=0..\";rt=\"Text\"",
-         res_get_handler,
-         NULL,
-         NULL,
-         NULL);
+		"title=\"Hello world: ?len=0..\";rt=\"Text\"",
+		res_get_handler,
+		NULL,
+		NULL,
+		NULL);
 
-
-static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset){
+static void res_get_handler(void *request, void *response, uint8_t *buffer,
+		uint16_t preferred_size, int32_t *offset)
+{
 	const char *pin = NULL;
 	size_t length = 0;
 
-	  /*if(length = REST.get_query_variable(request, "pin", &pin)) {
+	if (length = REST.get_query_variable(request, "pin", &pin))
+	{
 
-	    if(data_in_flash.is_pin_changed == 0 && length != 4) {
+		load_data();
 
-	    // start allarm , wrong PIN
-	      printf("------- wrong PIN, alarm START ------\n");
-	    }
-	    else if(data_in_flash.is_pin_changed == 0 && length == 4) {
-	    	if(strncmp(pin, data_in_flash.default_pin, length)){
-	    		//send secret because the pin is correct
-	    		// reset etimer so we have 5 mins of secret
+		if (length != 4)
+		{
+			turn_on_alarm();
+		}
+		else if (length == 4 && data_in_flash.is_pin_default == 1)
+		{
+			load_data();
+			if (strncmp(pin, "1234", length) == 0)
+			{
+				snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d", data_in_flash.secret);
+						int length= strlen((char*)buffer);
+						REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
+						REST.set_header_etag(response, (uint8_t *)&length, 1);
+						REST.set_response_payload(response, buffer, length);
+			}
+			else
+			{
+				turn_on_alarm();
+			}
+			save_data();
+		}
 
-	    		printf("------- GOOD PIN, secret > %d ------\n", data_in_flash.secret);
+		else if (length == 4 && data_in_flash.is_pin_default == 0)
+		{
+			load_data();
+			if (strncmp(pin, data_in_flash.user_pin, length) == 0)
+			{
+				snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d", data_in_flash.secret);
+				int length= strlen((char*)buffer);
+				REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
+				REST.set_header_etag(response, (uint8_t *)&length, 1);
+				REST.set_response_payload(response, buffer, length);
+			}
+			else
+			{
+				turn_on_alarm();
+			}
+			save_data();
+		}
+		save_data();
 
-	    	}
-	    	else{
-	    		// start allarm , wrong PIN
-	    		printf("------- wrong PIN, alarm START ------\n");
-	    	}
-
-	    }
-
-
-	    //if(!put_once)
-	    	memcpy(buffer, message, length);
-	    //else if(put_once)
-	    	//memcpy(buffer,input, (rv+1)*sizeof(char));
-	  }*/
+	}
 }
 

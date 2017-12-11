@@ -17,9 +17,8 @@
 #define CONFIG_FLASH_OFFSET 0
 
 void set_init_data(){
-	data_in_flash.is_pin_changed = 0;
 	data_in_flash.is_armed = 0;
-	data_in_flash.is_pin_default = 1;
+	data_in_flash.is_pin_default = 1; //pin is default = 1
 	data_in_flash.default_pin = "1234";
 }
 
@@ -85,4 +84,20 @@ void load_data(void)
   }
   #endif
 
+}
+
+void turn_on_alarm()
+{
+	load_data();
+	buzzer_start(1000);
+	data_in_flash.is_alarm_on =1;
+	save_data();
+}
+
+void turn_off_alarm()
+{
+	load_data();
+	buzzer_stop();
+	data_in_flash.is_alarm_on = 0;
+	save_data();
 }
