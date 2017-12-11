@@ -32,8 +32,8 @@ res_put_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	const char *url = NULL;
 	int len =0;
 	len=REST.get_url(request,&url);
-	printf("%d", len);
-	printf("%s", url);
+	//printf("%d", len);
+	//printf("%s", url);
 		if(strncmp(url, "keepalive", len) == 0){
 			etimer_set(&et, ETIMER_INTERVAL);
 			success=0;

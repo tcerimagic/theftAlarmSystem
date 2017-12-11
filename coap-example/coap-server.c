@@ -50,6 +50,8 @@
 #include "mpu-9250-sensor.h"
 #include "ti-lib.h"
 
+#include "dev/leds.h"
+#include "board-peripherals.h"
 
 
 #include "buzzer.h"
@@ -72,11 +74,13 @@
 #endif
 
 
+#define LED_TOGGLE_INTERVAL 		(CLOCK_SECOND * 0.5)
 
 /*------ Global variables --------------------*/
 
 static struct etimer fmin_etimer;
 static int secret_code = 0;
+static struct etimer alarm_timer;
 
 
 /*------ FUNctions ---------------------------*/
@@ -102,7 +106,8 @@ extern resource_t
   res_keepalive;
 
 PROCESS(er_example_server, "Erbium Example Server");
-AUTOSTART_PROCESSES(&resolv_process,&er_example_server);
+PROCESS(alarm_on, "ALARM is ON");
+AUTOSTART_PROCESSES(&resolv_process,&er_example_server, &alarm_on);
 
 PROCESS_THREAD(er_example_server, ev, data)
 {
@@ -218,3 +223,26 @@ PROCESS_THREAD(er_example_server, ev, data)
 
   PROCESS_END();
 }
+
+PROCESS_THREAD(alarm_on, ev, data){
+	PROCESS_EXITHANDLER();// Cleanup code (if any)
+	PROCESS_BEGIN();
+
+	etimer_set(&alarm_timer, LED_TOGGLE_INTERVAL);
+
+	while(1) {
+
+			PROCESS_WAIT_EVENT();
+			if( ev == PROCESS_EVENT_TIMER) {
+				load_data();
+				if(data_in_flash.is_alarm_on){
+						etimer_set(&alarm_timer, LED_TOGGLE_INTERVAL);
+						leds_toggle(LEDS_RED);
+						printf("toggle led");
+					}
+				}
+			}
+
+		PROCESS_END();
+}
+

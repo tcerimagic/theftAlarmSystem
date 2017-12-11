@@ -15,6 +15,9 @@
 #include "flash-head.h"
 
 #define CONFIG_FLASH_OFFSET 0
+#define LED_TOGGLE_INTERVAL 		(CLOCK_SECOND * 0.5)
+
+static struct etimer alarm_timer;
 
 void set_init_data(){
 	data_in_flash.is_armed = 0;
@@ -91,6 +94,7 @@ void turn_on_alarm()
 	load_data();
 	buzzer_start(1000);
 	data_in_flash.is_alarm_on =1;
+	etimer_set(&alarm_timer, LED_TOGGLE_INTERVAL);
 	save_data();
 }
 
