@@ -241,11 +241,6 @@ PROCESS_THREAD(er_example_client, ev, data)
 
       /* send a request to notify the end of the process */
 
-
-    /*---------------------This was changed from GET to POST for left button to be able to trigger led-----------------------*/
-      //coap_init_message(request, COAP_TYPE_CON, COAP_GET, 0);
-    	//coap_init_message(request, COAP_TYPE_CON, COAP_POST, 0);
-
     	coap_init_message(request, COAP_TYPE_CON, COAP_GET, 0);
       coap_set_header_uri_path(request, service_urls[3]);
 
@@ -259,7 +254,7 @@ PROCESS_THREAD(er_example_client, ev, data)
 
       printf("\n--Done--\n");
 
-      uri_switch = (uri_switch + 1) % NUMBER_OF_URLS;
+     // uri_switch = (uri_switch + 1) % NUMBER_OF_URLS;
     } else if(ev == sensors_event && data == &button_right_sensor) {
 			/*printf("--Toggle tutton--\n");
 			toggle_observation();
@@ -268,12 +263,12 @@ PROCESS_THREAD(er_example_client, ev, data)
     	coap_init_message(request, COAP_TYPE_CON, COAP_PUT, 0);
     	      coap_set_header_uri_path(request, service_urls[3]);
 
-    	      printf("--Requesting %s--\n", "?message=MajaEnizTimur were here!!");
+    	      printf("--Requesting %s--\n", "MajaEnizTimur were here!");
 
     	      PRINT6ADDR(&server_ipaddr);
     	      PRINTF(" : %u\n", UIP_HTONS(REMOTE_PORT));
 
-    	      coap_set_header_uri_query(request, "message=MajaEnizTimur were here!!");
+    	      coap_set_header_uri_query(request, "message=MajaEnizTimur were here!");
 
     	      COAP_BLOCKING_REQUEST(&server_ipaddr, REMOTE_PORT, request,
     	                            client_chunk_handler);

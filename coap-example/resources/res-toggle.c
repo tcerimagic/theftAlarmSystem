@@ -44,11 +44,12 @@
 #include "dev/leds.h"
 
 static void res_post_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
+static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 
 /* A simple actuator example. Toggles the red led */
 RESOURCE(res_toggle,
          "title=\"Red LED\";rt=\"Control\"",
-         NULL,
+		 res_get_handler,
          res_post_handler,
          NULL,
          NULL);
@@ -58,3 +59,9 @@ res_post_handler(void *request, void *response, uint8_t *buffer, uint16_t prefer
 {
   leds_toggle(LEDS_RED);
 }
+static void
+res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
+{
+	leds_toggle(LEDS_RED);
+}
+

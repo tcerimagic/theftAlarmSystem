@@ -29,7 +29,7 @@ static void res_get_handler(void *request, void *response, uint8_t *buffer, uint
 	const char *pin = NULL;
 	size_t length = 0;
 
-	  if(length = REST.get_query_variable(request, "pin", &pin)) {
+	  /*if(length = REST.get_query_variable(request, "pin", &pin)) {
 
 	    if(data_in_flash.is_pin_changed == 0 && length != 4) {
 
@@ -56,6 +56,6 @@ static void res_get_handler(void *request, void *response, uint8_t *buffer, uint
 	    	memcpy(buffer, message, length);
 	    //else if(put_once)
 	    	//memcpy(buffer,input, (rv+1)*sizeof(char));
-	  }
+	  }*/
 }
 
