@@ -174,10 +174,11 @@ PROCESS_THREAD(er_example_server, ev, data)
   /* Define application-specific events here. */
   /*--- 5 minute timer initialisation ----*/
 
-  if(secret_code == 0){
+/*  if(secret_code == 0){
+	  load_data();
 	 set_init_data();
 	 save_data();
-  }
+  }*/
 
   etimer_set(&fmin_etimer, CLOCK_SECOND * 5);
 
@@ -194,12 +195,16 @@ PROCESS_THREAD(er_example_server, ev, data)
     else if(etimer_expired(&fmin_etimer)){
 
     	load_data();
+    	 if(secret_code == 0)
+    	    {
+    	    	set_init_data();
+    	    }
 
     	secret_code = data_in_flash.secret;
 
     	data_in_flash.secret = ++secret_code;
 
-        //printf("default pin %s\n", data_in_flash.default_pin);
+        printf("default pin %s\n", data_in_flash.default_pin);
 
     	save_data();
 

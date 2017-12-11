@@ -17,10 +17,10 @@
 #define CONFIG_FLASH_OFFSET 0
 
 void set_init_data(){
-	data_in_flash.secret = 4;
-	data_in_flash.default_pin = "1234";
 	data_in_flash.is_pin_changed = 0;
 	data_in_flash.is_armed = 0;
+	data_in_flash.is_pin_default = 1;
+	data_in_flash.default_pin = "1234";
 }
 
 

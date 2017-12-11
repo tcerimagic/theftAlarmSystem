@@ -23,6 +23,7 @@ struct AuthData{
 	int is_pin_changed; // if 0 -> not changed
 	int secret;
 	int is_armed;
+	int is_pin_default;
 };
 
 struct AuthData data_in_flash;
