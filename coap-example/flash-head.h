@@ -36,4 +36,10 @@ static struct etimer fmin_etimer;
 
 struct AuthData data_in_flash;
 
+process_event_t arm_device_event;
+
+process_event_t disarm_device_event;
+
+int arm_device;
+
 #endif /* THEFTALARMSYSTEM_COAP_EXAMPLE_FLASH_HEAD_H_ */

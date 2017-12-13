@@ -53,7 +53,6 @@
 #include "dev/leds.h"
 #include "board-peripherals.h"
 
-
 #include "buzzer.h"
 #include "ti-lib.h"
 #include "lpm.h"
@@ -74,207 +73,212 @@
 #endif
 
 
-#define LED_TOGGLE_INTERVAL 		(CLOCK_SECOND * 0.5)
-
 /*------ Global variables --------------------*/
 
-
 static int secret_code = 0;
-static struct etimer alarm_timer;
+static int i = 0;
+static struct etimer et2;
+static struct etimer et3;
+static int x_axis;
+static int y_axis;
+static int z_axis;
 
+arm_device = 0;
 
 /*------ FUNctions ---------------------------*/
-
 
 /*
  * Resources to be activated need to be imported through the extern keyword.
  * The build system automatically compiles the resources in the corresponding sub-directory.
  */
-extern resource_t
-  res_hello,
-  res_event,
-  res_push,
-  res_leds,
-  res_batmon,
-  res_toggle,
-  res_login,
-  res_change,
-  res_sensor,
-  res_arm,
-  res_threshold,
-  res_alarm,
-  res_keepalive;
+extern resource_t res_hello, res_event, res_push, res_leds, res_batmon,
+		res_toggle, res_login, res_change, res_sensor, res_arm, res_threshold,
+		res_alarm, res_keepalive;
 
 PROCESS(er_example_server, "Erbium Example Server");
-//PROCESS(alarm_on, "ALARM is ON");
-AUTOSTART_PROCESSES(&resolv_process,&er_example_server);
+PROCESS(alarm_on, "ALARM is ON");
+AUTOSTART_PROCESSES(&alarm_on, &er_example_server);
 
-PROCESS_THREAD(er_example_server, ev, data)
-{
+PROCESS_THREAD( er_example_server, ev, data) {
 	SENSORS_ACTIVATE(batmon_sensor);
 	//SENSORS_ACTIVATE(mpu_9250_sensor);
 	//init_mpu_reading(NULL);
-	mpu_9250_sensor.configure(SENSORS_ACTIVE,MPU_9250_SENSOR_TYPE_ALL);
+	mpu_9250_sensor.configure(SENSORS_ACTIVE, MPU_9250_SENSOR_TYPE_ALL);
 	buzzer_init();
 #if DAG_ROOT_ENABLE
-  struct uip_ds6_addr *root_if;
-  uip_ipaddr_t ipaddr;
+	struct uip_ds6_addr *root_if;
+	uip_ipaddr_t ipaddr;
 #endif
 
-  PROCESS_BEGIN();
+	PROCESS_BEGIN();
 
 #if DAG_ROOT_ENABLE
-  uip_ip6addr(&ipaddr, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
-  uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
-  uip_ds6_addr_add(&ipaddr, 0, ADDR_MANUAL);
+	uip_ip6addr(&ipaddr, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
+	uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
+	uip_ds6_addr_add(&ipaddr, 0, ADDR_MANUAL);
 
-  root_if = uip_ds6_addr_lookup(&ipaddr);
-  if(root_if != NULL) {
-    rpl_dag_t *dag;
-    dag = rpl_set_root(RPL_DEFAULT_INSTANCE,(uip_ip6addr_t *)&ipaddr);
-    uip_ip6addr(&ipaddr, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
-    rpl_set_prefix(dag, &ipaddr, 64);
-    PRINTF("created a new RPL dag\n");
-  } else {
-    PRINTF("failed to create a new RPL DAG\n");
-  }
+	root_if = uip_ds6_addr_lookup(&ipaddr);
+	if(root_if != NULL) {
+		rpl_dag_t *dag;
+		dag = rpl_set_root(RPL_DEFAULT_INSTANCE,(uip_ip6addr_t *)&ipaddr);
+		uip_ip6addr(&ipaddr, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
+		rpl_set_prefix(dag, &ipaddr, 64);
+		PRINTF("created a new RPL dag\n");
+	} else {
+		PRINTF("failed to create a new RPL DAG\n");
+	}
 #endif
 
-  resolv_set_hostname("exercise6_sink");
+	resolv_set_hostname("exercise6_sink");
 
-  PROCESS_PAUSE();
+	PROCESS_PAUSE();
 
-  PRINTF("Starting Erbium Example Server\n");
+	PRINTF("Starting Erbium Example Server\n");
 
-  PRINTF("uIP buffer: %u\n", UIP_BUFSIZE);
-  PRINTF("LL header: %u\n", UIP_LLH_LEN);
-  PRINTF("IP+UDP header: %u\n", UIP_IPUDPH_LEN);
-  PRINTF("REST max chunk: %u\n", REST_MAX_CHUNK_SIZE);
+	PRINTF("uIP buffer: %u\n", UIP_BUFSIZE);
+	PRINTF("LL header: %u\n", UIP_LLH_LEN);
+	PRINTF("IP+UDP header: %u\n", UIP_IPUDPH_LEN);
+	PRINTF("REST max chunk: %u\n", REST_MAX_CHUNK_SIZE);
 
-  /* Initialize the REST engine. */
-  rest_init_engine();
+	/* Initialize the REST engine. */
+	rest_init_engine();
 
-  /*
-   * Bind the resources to their Uri-Path.
-   * WARNING: Activating twice only means alternate path, not two instances!
-   * All static variables are the same for each URI path.
-   */
-  	 rest_activate_resource(&res_hello, "test/hello");
-     rest_activate_resource(&res_leds, "actuators/leds");
-     rest_activate_resource(&res_toggle, "actuators/toggle");
-     rest_activate_resource(&res_push, "test/push");
-     rest_activate_resource(&res_event, "sensors/button");
-     rest_activate_resource(&res_batmon, "sensors/battery");
-     rest_activate_resource(&res_login, "auth/login");
-     rest_activate_resource(&res_change, "auth/change");
-     rest_activate_resource(&res_arm, "theft/arm");
-     rest_activate_resource(&res_threshold, "theft/threshold");
-     rest_activate_resource(&res_alarm, "theft/alarm");
-     rest_activate_resource(&res_sensor, "theft/sensor");
-     rest_activate_resource(&res_keepalive, "keepalive");
+	/*
+	 * Bind the resources to their Uri-Path.
+	 * WARNING: Activating twice only means alternate path, not two instances!
+	 * All static variables are the same for each URI path.
+	 */
+	rest_activate_resource(&res_hello, "test/hello");
+	rest_activate_resource(&res_leds, "actuators/leds");
+	rest_activate_resource(&res_toggle, "actuators/toggle");
+	rest_activate_resource(&res_push, "test/push");
+	rest_activate_resource(&res_event, "sensors/button");
+	rest_activate_resource(&res_batmon, "sensors/battery");
+	rest_activate_resource(&res_login, "auth/login");
+	rest_activate_resource(&res_change, "auth/change");
+	rest_activate_resource(&res_arm, "theft/arm");
+	rest_activate_resource(&res_threshold, "theft/threshold");
+	rest_activate_resource(&res_alarm, "theft/alarm");
+	rest_activate_resource(&res_sensor, "theft/sensor");
+	rest_activate_resource(&res_keepalive, "keepalive");
 
+	etimer_set(&fmin_etimer, CLOCK_SECOND * 300);
 
-  etimer_set(&fmin_etimer, CLOCK_SECOND * 300);
+	if (data_in_flash.secret == -1) {
+		load_data();
+		set_init_data();
+		save_data();
+	}
 
-  if(data_in_flash.secret == -1)
-    {
-	  load_data();
-	  set_init_data();
-	  save_data();
-    }
+	while (1) {
+		PROCESS_WAIT_EVENT();
 
-  while(1) {
-    PROCESS_WAIT_EVENT();
+		if (ev == sensors_event && data == &button_sensor) {
+			PRINTF("*******BUTTON*******\n");
 
-    if(ev == sensors_event && data == &button_sensor) {
-      PRINTF("*******BUTTON*******\n");
+			/* Call the event_handler for this application-specific event. */
+			res_event.trigger();
 
-      /* Call the event_handler for this application-specific event. */
-      res_event.trigger();
+		} else if (etimer_expired(&fmin_etimer)) {
 
-    }
-    else if(etimer_expired(&fmin_etimer)){
+			load_data();
+			if (secret_code == 0) {
+				set_init_data();
+			}
 
-    	load_data();
-    	 if(secret_code == 0)
-    	    {
-    	    	set_init_data();
-    	    }
+			secret_code = data_in_flash.secret;
 
-    	secret_code = data_in_flash.secret;
+			data_in_flash.secret = ++secret_code;
 
-    	data_in_flash.secret = ++secret_code;
+			printf("default pin %s\n", data_in_flash.default_pin);
 
-        printf("default pin %s\n", data_in_flash.default_pin);
+			save_data();
 
-    	save_data();
+			etimer_set(&fmin_etimer, CLOCK_SECOND * 300);
 
-    	etimer_set(&fmin_etimer, CLOCK_SECOND * 300);
+		}
 
+	}
 
-
-    }
-
- }
-
-  PROCESS_END();
+	PROCESS_END();
 }
 
-/*PROCESS_THREAD(alarm_on, ev, data){
+PROCESS_THREAD(alarm_on, ev, data) {
 	PROCESS_EXITHANDLER();
 	PROCESS_BEGIN();
 
-	//timer_set(&alarm_timer, LED_TOGGLE_INTERVAL);
-	load_data();
+	while (1) {
+		printf("in while, green on\n");
 
-	while(1) {
-		printf("uso u while");
-		if(data_in_flash.is_armed == 1){
+		leds_off(LEDS_RED);
+		leds_on(LEDS_GREEN);
+
+		PROCESS_WAIT_EVENT();
+		if (arm_device == 1) {
 
 			int armed_device = 0;
+			leds_off(LEDS_GREEN);
 
-			while(armed_device != 1){
-				int x_axis= mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_X);
-				int y_axis= mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_Y);
-				int z_axis= mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_Z);
+			leds_on(LEDS_RED);
+			while (i < 2) {
+
+				etimer_set(&et2, CLOCK_SECOND / 2);
+
+				leds_off(LEDS_RED);
+				PROCESS_WAIT_EVENT_UNTIL(ev == PROCESS_EVENT_TIMER);
+
+				leds_on(LEDS_RED);
+
+				i++;
+
+			}
+			leds_off(LEDS_RED);
+
+			etimer_set(&et3, CLOCK_SECOND*10);
+			while (armed_device != 1 && data_in_flash.is_armed == 1) {
+
+				if(etimer_expired(&et3)){
+					etimer_set(&et2, CLOCK_SECOND / 2);
+					leds_on(LEDS_RED);
+					PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et2));
+					leds_off(LEDS_RED);
+
+					etimer_reset(&et3);
+				}
+
+				x_axis = mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_X);
+				y_axis = mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_Y);
+				z_axis = mpu_9250_sensor.value(MPU_9250_SENSOR_TYPE_ACC_Z);
 
 				load_data();
-				if(x_axis > data_in_flash.threshold){
+
+				if (x_axis > data_in_flash.threshold) {
+					turn_on_alarm();
+					armed_device = 1;
+				} else if (y_axis > data_in_flash.threshold) {
+					turn_on_alarm();
+					armed_device = 1;
+				} else if (z_axis > data_in_flash.threshold) {
 					turn_on_alarm();
 					armed_device = 1;
 				}
-				else if(y_axis > data_in_flash.threshold){
-					turn_on_alarm();
-					armed_device = 1;
-				}
-				else if(z_axis > data_in_flash.threshold){
-					turn_on_alarm();
-					armed_device = 1;
-				}
-				save_data();
+				//save_data();
 
 			}
+			arm_device = 0;
 
-			if(armed_device == 1){
-				etimer_set(&alarm_timer, LED_TOGGLE_INTERVAL);
+		} else if (arm_device == 2) {
+			turn_off_alarm();
+			printf("disarm\n");
 
-			}
-
+			leds_off(LEDS_RED);
+			leds_on(LEDS_GREEN);
+			arm_device = 0;
 		}
-		else if(data_in_flash.is_armed == 0){
-				turn_off_alarm();
-				printf("u disarmu");
-		}
 
-		if(etimer_expired(&alarm_timer)){
-			leds_toggle(LEDS_RED);
-			if(data_in_flash.is_alarm_on){
-				etimer_set(&alarm_timer, LED_TOGGLE_INTERVAL);
-			}
-		}
+
 	}
 
-
-		PROCESS_END();
-}*/
+	PROCESS_END();
+}
 
