@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "rest-engine.h"
+#include "../flash-head.h"
 
 #define ETIMER_INTERVAL 		(CLOCK_SECOND * 60)
 static void res_put_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
@@ -34,11 +35,13 @@ res_put_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	len=REST.get_url(request,&url);
 	//printf("%d", len);
 	//printf("%s", url);
+	load_data();
 		if(strncmp(url, "keepalive", len) == 0){
 			etimer_set(&et, ETIMER_INTERVAL);
 			success=0;
 		}
 		else{
+			turn_on_alarm();
 			success=-1;
 		}
 

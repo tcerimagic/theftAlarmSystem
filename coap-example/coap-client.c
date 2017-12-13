@@ -49,13 +49,16 @@
 /*--------------------------Changed to 4 for test/hello-----------------------*/
 //#define NUMBER_OF_URLS 3
 
-#define NUMBER_OF_URLS 4
+#define NUMBER_OF_URLS 6
 /* leading and ending slashes only for demo purposes, get cropped automatically when setting the Uri-Path */
 char *service_urls[NUMBER_OF_URLS] =
 //{ ".well-known/core", "actuators/toggle", "sensors/battery" };
-{ ".well-known/core", "actuators/toggle", "sensors/battery", "test/hello" };
+{ ".well-known/core", "actuators/toggle", "sensors/battery", "test/hello", "theft/alarm", "auth/login" };
 
 static int uri_switch = 0;
+
+const uint8_t *final_response;
+static int response_length;
 
 #define OBS_RESOURCE_URI "sensors/button"
 
@@ -180,6 +183,8 @@ client_chunk_handler(void *response)
 
   int len = coap_get_payload(response, &chunk);
 
+  snprintf((char *)final_response, REST_MAX_CHUNK_SIZE, "%s%s", "seceret=",(char *)chunk);
+
   printf("%.*s", len, (char *)chunk);
 }
 PROCESS_THREAD(er_example_client, ev, data)
@@ -216,10 +221,9 @@ PROCESS_THREAD(er_example_client, ev, data)
   while(1) {
     PROCESS_YIELD();
 
-    if(etimer_expired(&et)) {
+   /* if(etimer_expired(&et)) {
       printf("--Toggle timer--\n");
 
-      /* prepare request, TID is set by COAP_BLOCKING_REQUEST() */
       coap_init_message(request, COAP_TYPE_CON, COAP_POST, 0);
       coap_set_header_uri_path(request, service_urls[1]);
 
@@ -237,41 +241,43 @@ PROCESS_THREAD(er_example_client, ev, data)
 
       etimer_reset(&et);
 
-    } else if(ev == sensors_event && data == &button_left_sensor) {
+    } */
+  if(ev == sensors_event && data == &button_left_sensor) {
 
       /* send a request to notify the end of the process */
 
     	coap_init_message(request, COAP_TYPE_CON, COAP_GET, 0);
-      coap_set_header_uri_path(request, service_urls[3]);
-
-      printf("--Requesting %s--\n", service_urls[3]);
-
-      PRINT6ADDR(&server_ipaddr);
-      PRINTF(" : %u\n", UIP_HTONS(REMOTE_PORT));
-
+      coap_set_header_uri_path(request, service_urls[5]);
+      coap_set_header_uri_query(request, "pin=1234");
       COAP_BLOCKING_REQUEST(&server_ipaddr, REMOTE_PORT, request,
                             client_chunk_handler);
 
-      printf("\n--Done--\n");
+
+
+      coap_init_message(request, COAP_TYPE_CON, COAP_POST, 0);
+            coap_set_header_uri_path(request, service_urls[4]);
+            coap_set_header_uri_query(request, (char *)final_response);
+            COAP_BLOCKING_REQUEST(&server_ipaddr, REMOTE_PORT, request,
+                                  client_chunk_handler);
+
 
      // uri_switch = (uri_switch + 1) % NUMBER_OF_URLS;
-    } else if(ev == sensors_event && data == &button_right_sensor) {
-			/*printf("--Toggle tutton--\n");
-			toggle_observation();
-			printf("\n--Done--\n");*/
+    }
+    else if(ev == sensors_event && data == &button_right_sensor) {
 
-    	coap_init_message(request, COAP_TYPE_CON, COAP_PUT, 0);
-    	      coap_set_header_uri_path(request, service_urls[3]);
-
-    	      printf("--Requesting %s--\n", "MajaEnizTimur were here!");
-
-    	      PRINT6ADDR(&server_ipaddr);
-    	      PRINTF(" : %u\n", UIP_HTONS(REMOTE_PORT));
-
-    	      coap_set_header_uri_query(request, "message=MajaEnizTimur were here!");
-
+    	coap_init_message(request, COAP_TYPE_CON, COAP_GET, 0);
+    	      coap_set_header_uri_path(request, service_urls[5]);
+    	      coap_set_header_uri_query(request, "pin=1234");
     	      COAP_BLOCKING_REQUEST(&server_ipaddr, REMOTE_PORT, request,
     	                            client_chunk_handler);
+
+
+
+    	      coap_init_message(request, COAP_TYPE_CON, COAP_DELETE, 0);
+    	            coap_set_header_uri_path(request, service_urls[4]);
+    	            coap_set_header_uri_query(request, (char *)final_response);
+    	            COAP_BLOCKING_REQUEST(&server_ipaddr, REMOTE_PORT, request,
+    	                                  client_chunk_handler);
 
 
 		}
